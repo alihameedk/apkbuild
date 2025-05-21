@@ -1,13 +1,16 @@
 [app]
+# App metadata
 title = YTTrimmer
 package.name = yttrimmer
 package.domain = org.example
+version = 1.0.0
+source.dir = .
 
-# source files & assets
+# What to include
 source.include_exts = py,kv
 android.copy_assets = assets
 
-# real Python requirements
+# Python deps
 requirements = kivy==2.3.0,httplib2
 
 # Android settings
