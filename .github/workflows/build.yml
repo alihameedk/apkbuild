@@ -71,7 +71,7 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url:         ${{ steps.release.outputs.upload_url }}
-          asset_path:         bin/yttrimmer-1.0.0-arm64-v8a-release-unsigned.apk
+          asset_path:         bin/*.apk
           asset_name:         yt-trimmer.apk
           asset_content_type: application/vnd.android.package-archive
         env:
