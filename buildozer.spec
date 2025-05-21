@@ -5,6 +5,8 @@ package.name       = yttrimmer
 package.domain     = org.example
 version            = 1.0.0
 source.dir         = .
+# Force Buildozer to generate an APK instead of an AAB
+android.release_artifact = apk
 
 # What to include
 source.include_exts = py,kv
