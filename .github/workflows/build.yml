@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-22.04
 
     env:
-      # Tell Buildozer where to find our SDK
       ANDROID_SDK_ROOT: $HOME/android-sdk
       ANDROID_HOME:    $HOME/android-sdk
 
@@ -20,14 +19,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2) Install system dependencies
-      - name: Install system deps
+      # 2) Install system deps (Buildozer, Cython)
+      - name: Install system dependencies
         run: |
           sudo apt update
           sudo apt install -y zip unzip openjdk-17-jdk python3-pip
           pip3 install --no-input buildozer==1.5.0 Cython==0.29.36
 
-      # 3) Download & install the Android command-line tools + SDK
+      # 3) Download & install Android SDK + Build-Tools, and accept licenses
       - name: Setup Android SDK
         run: |
           SDK="$HOME/android-sdk"
@@ -36,12 +35,16 @@ jobs:
           unzip -q cmdline-tools.zip -d "$SDK/cmdline-tools"
           mv "$SDK/cmdline-tools/cmdline-tools" "$SDK/cmdline-tools/latest"
 
+          # Create the legacy tools/bin path P4A expects
+          mkdir -p "$SDK/tools/bin"
+          ln -s "$SDK/cmdline-tools/latest/bin/sdkmanager" "$SDK/tools/bin/sdkmanager"
+
           # Install platform-tools, platforms, and Build-Tools 36.0.0
-          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" \
+          yes | "$SDK/tools/bin/sdkmanager" --sdk_root="$SDK" \
             "platform-tools" "platforms;android-33" "build-tools;36.0.0"
 
-          # Accept all licenses
-          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" --licenses
+          # Accept all SDK licenses
+          yes | "$SDK/tools/bin/sdkmanager" --sdk_root="$SDK" --licenses
 
       # 4) Make your bundled binaries executable
       - name: Make assets executable
@@ -59,10 +62,10 @@ jobs:
         id: release
         uses: actions/create-release@v1
         with:
-          tag_name:      apk-${{ github.run_number }}
-          release_name:  APK build ${{ github.run_number }}
-          draft:         true
-          prerelease:    false
+          tag_name:     apk-${{ github.run_number }}
+          release_name: APK build ${{ github.run_number }}
+          draft:        true
+          prerelease:   false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -70,9 +73,9 @@ jobs:
       - name: Upload to Release
         uses: actions/upload-release-asset@v1
         with:
-          upload_url:          ${{ steps.release.outputs.upload_url }}
-          asset_path:          bin/*release.apk
-          asset_name:          yt-trimmer.apk
-          asset_content_type:  application/vnd.android.package-archive
+          upload_url:         ${{ steps.release.outputs.upload_url }}
+          asset_path:         bin/*release.apk
+          asset_name:         yt-trimmer.apk
+          asset_content_type: application/vnd.android.package-archive
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
