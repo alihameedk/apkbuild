@@ -1,18 +1,10 @@
 name: Android APK
 
-# ─── Top-level permissions ─────────────────────────────────────────────────
-permissions:
-  contents: read    # allow actions/checkout
-  actions: read     # allow pulling workflow actions
-  packages: read    # allow pulling upload-artifact from GitHub Packages
-
-# ─── Trigger ───────────────────────────────────────────────────────────────
 on:
   push:
     branches:
       - main
 
-# ─── Jobs ─────────────────────────────────────────────────────────────────
 jobs:
   build:
     runs-on: ubuntu-22.04
