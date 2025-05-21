@@ -1,3 +1,5 @@
+# .github/workflows/build.yml  ← paste everything below
+
 name: Android APK
 
 on:
@@ -9,11 +11,12 @@ jobs:
     runs-on: ubuntu-22.04
 
     permissions:
-      contents: read
-      packages: write
+      contents: read          # checkout needs this
+      packages: write         # upload-artifact needs this
 
     steps:
-    - uses: actions/checkout@v4    # pulls repo
+    - name: Checkout repo
+      uses: actions/checkout@v4
 
     - name: Install system deps
       run: |
