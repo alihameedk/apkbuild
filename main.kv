@@ -1,0 +1,54 @@
+<Root>:
+    orientation: "vertical"
+    padding: 10
+    spacing: 10
+
+    TextInput:
+        id: url
+        hint_text: "YouTube URL"
+        size_hint_y: None
+        height: "40dp"
+
+    TextInput:
+        id: start
+        hint_text: "Start (HH:MM:SS)"
+        size_hint_y: None
+        height: "40dp"
+
+    TextInput:
+        id: end
+        hint_text: "End (HH:MM:SS)"
+        size_hint_y: None
+        height: "40dp"
+
+    TextInput:
+        id: speed
+        hint_text: "Speed (e.g. 1.0)"
+        text: "1.0"
+        size_hint_y: None
+        height: "40dp"
+
+    TextInput:
+        id: res
+        hint_text: "Resolution (144 / 240 … / audio)"
+        text: "360"
+        size_hint_y: None
+        height: "40dp"
+
+    TextInput:
+        id: out
+        hint_text: "Output file name (clip.mp4 / clip.m4a)"
+        size_hint_y: None
+        height: "40dp"
+
+    Button:
+        text: "Trim"
+        size_hint_y: None
+        height: "45dp"
+        on_release: root.run_trim()
+
+    Label:
+        id: status
+        text: root.status
+        size_hint_y: None
+        height: "30dp"
