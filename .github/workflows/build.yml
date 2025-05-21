@@ -1,9 +1,9 @@
 name: Android APK
 
-# 👇 allow the runner to pull down third-party actions
 permissions:
-  contents: read
-  actions: read
+  contents: read        # allow checkout
+  actions: read         # allow pulling workflow actions
+  packages: read        # allow pulling the upload-artifact package
 
 on:
   push:
@@ -29,8 +29,7 @@ jobs:
         run: buildozer -v android release
 
       - name: Upload APK
-        # pin to a concrete v3.x that definitely exists
-        uses: actions/upload-artifact@v3.0.0
+        uses: actions/upload-artifact@v3   # you can also pin to v3.1.2 or v3.0.0 if you like
         with:
           name: yt-trimmer-apk
           path: bin/*release.apk
