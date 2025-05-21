@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:  # optional: allows manual runs
+  workflow_dispatch:
 
 jobs:
   build:
@@ -22,10 +22,15 @@ jobs:
           sudo apt install -y zip openjdk-17-jdk python3-pip
           pip3 install --no-input buildozer==1.5.0 Cython==0.29.36
 
-      # 3) Pre-accept Android SDK licenses so p4a can install build-tools
-      - name: Pre-accept Android SDK licenses
+      # 3) Pre-install & accept SDK build-tools licenses
+      - name: Install & accept Android SDK Build-Tools
         run: |
-          yes | $HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --licenses || true
+          # Point to the sdkmanager that p4a will use
+          SDKMANAGER="$HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager"
+          # Install the specific build-tools version your spec asks for
+          yes | $SDKMANAGER "build-tools;36.0.0" "platforms;android-33" || true
+          # Accept all licenses
+          yes | $SDKMANAGER --licenses || true
 
       # 4) Make your bundled binaries executable
       - name: Make assets executable
