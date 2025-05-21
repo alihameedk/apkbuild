@@ -10,27 +10,38 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
+    env:
+      # Tell Buildozer where to find our SDK
+      ANDROID_SDK_ROOT: $HOME/android-sdk
+      ANDROID_HOME:    $HOME/android-sdk
+
     steps:
-      # 1) Checkout your code
+      # 1) Checkout your repo
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2) Install Buildozer + system deps
-      - name: Install system dependencies
+      # 2) Install system dependencies
+      - name: Install system deps
         run: |
           sudo apt update
-          sudo apt install -y zip openjdk-17-jdk python3-pip
+          sudo apt install -y zip unzip openjdk-17-jdk python3-pip
           pip3 install --no-input buildozer==1.5.0 Cython==0.29.36
 
-      # 3) Pre-install & accept SDK build-tools licenses
-      - name: Install & accept Android SDK Build-Tools
+      # 3) Download & install the Android command-line tools + SDK
+      - name: Setup Android SDK
         run: |
-          # Point to the sdkmanager that p4a will use
-          SDKMANAGER="$HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager"
-          # Install the specific build-tools version your spec asks for
-          yes | $SDKMANAGER "build-tools;36.0.0" "platforms;android-33" || true
+          SDK="$HOME/android-sdk"
+          mkdir -p "$SDK/cmdline-tools"
+          curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -o cmdline-tools.zip
+          unzip -q cmdline-tools.zip -d "$SDK/cmdline-tools"
+          mv "$SDK/cmdline-tools/cmdline-tools" "$SDK/cmdline-tools/latest"
+
+          # Install platform-tools, platforms, and Build-Tools 36.0.0
+          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" \
+            "platform-tools" "platforms;android-33" "build-tools;36.0.0"
+
           # Accept all licenses
-          yes | $SDKMANAGER --licenses || true
+          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" --licenses
 
       # 4) Make your bundled binaries executable
       - name: Make assets executable
@@ -39,16 +50,19 @@ jobs:
       # 5) Build the release APK
       - name: Build Android APK
         run: buildozer -v android release
+        env:
+          ANDROID_SDK_ROOT: $HOME/android-sdk
+          ANDROID_HOME:    $HOME/android-sdk
 
       # 6) Create a draft GitHub Release
       - name: Create Release
         id: release
         uses: actions/create-release@v1
         with:
-          tag_name: apk-${{ github.run_number }}
-          release_name: APK build ${{ github.run_number }}
-          draft: true
-          prerelease: false
+          tag_name:      apk-${{ github.run_number }}
+          release_name:  APK build ${{ github.run_number }}
+          draft:         true
+          prerelease:    false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -56,9 +70,9 @@ jobs:
       - name: Upload to Release
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: bin/*release.apk
-          asset_name: yt-trimmer.apk
-          asset_content_type: application/vnd.android.package-archive
+          upload_url:          ${{ steps.release.outputs.upload_url }}
+          asset_path:          bin/*release.apk
+          asset_name:          yt-trimmer.apk
+          asset_content_type:  application/vnd.android.package-archive
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
