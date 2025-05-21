@@ -46,7 +46,7 @@ jobs:
         run: chmod +x assets/ffmpeg assets/yt-dlp_linux_aarch64
 
       - name: Build Android APK
-        run: buildozer -v android release
+        run: buildozer -v android debug
         env:
           ANDROID_SDK_ROOT: $HOME/android-sdk
           ANDROID_HOME:    $HOME/android-sdk
