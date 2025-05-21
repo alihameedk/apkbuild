@@ -1,5 +1,11 @@
 name: Android APK
 
+# ── Grant the runner rights to fetch actions/artifacts ───────────────────
+permissions:
+  contents: read    # for checkout
+  actions: read     # to pull workflow actions
+  packages: read    # to pull upload-artifact
+
 on:
   push:
     branches:
@@ -10,18 +16,18 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      # 1) Checkout your repo
+      # 1) Checkout your code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2) Install Buildozer + system deps
+      # 2) Install Buildozer & system deps
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y zip openjdk-17-jdk python3-pip
           pip3 install --no-input buildozer==1.5.0 Cython==0.29.36
 
-      # 3) Make your bundled binaries executable
+      # 3) Make your binaries executable
       - name: Make assets executable
         run: chmod +x assets/ffmpeg assets/yt-dlp_linux_aarch64
 
@@ -29,9 +35,9 @@ jobs:
       - name: Build Android APK
         run: buildozer -v android release
 
-      # 5) Upload the APK as an artifact
+      # 5) Upload the APK
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v2
         with:
           name: yt-trimmer-apk
           path: bin/*release.apk
