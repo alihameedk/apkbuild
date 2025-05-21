@@ -29,7 +29,7 @@ jobs:
 
       # 5) Upload result as artifact
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.2.1
         with:
           name: yt-trimmer-apk
           path: bin/*release.apk
