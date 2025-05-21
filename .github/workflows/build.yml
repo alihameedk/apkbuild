@@ -7,24 +7,27 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+
+    permissions:
+      contents: read  # required for checkout
+      packages: write # required for upload-artifact
+
     steps:
-      - uses: actions/checkout@v3
+    - name: Checkout repo
+      uses: actions/checkout@v4       # ← v4 is latest & signed by GitHub
 
-      - name: Install system deps
-        run: |
-          sudo apt update
-          sudo apt install -y git zip openjdk-17-jdk python3-pip autoconf automake libtool pkg-config
+    - name: Install system deps
+      run: |
+        sudo apt update
+        sudo apt install -y zip openjdk-17-jdk python3-pip
+        pip3 install --no-input buildozer==1.5.0 Cython==0.29.36
 
-      - name: Install Buildozer + Cython
-        run: |
-          pip3 install --no-input buildozer==1.5.0 Cython==0.29.36
+    - name: Build APK
+      run: |
+        buildozer -v android release
 
-      - name: Build APK
-        run: |
-          buildozer -v android release
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: yt-trimmer-apk
-          path: bin/*release.apk
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: yt-trimmer-apk
+        path: bin/*release.apk
