@@ -1,5 +1,3 @@
-# .github/workflows/build.yml  ← paste everything below
-
 name: Android APK
 
 on:
@@ -10,28 +8,31 @@ jobs:
   build:
     runs-on: ubuntu-22.04
 
-    permissions:
-      contents: read          # checkout needs this
-      packages: write         # upload-artifact needs this
+    # ---- simplest permissions: let GitHub set defaults ----
+    permissions: {}
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+    # 1. Check out repo
+    - uses: actions/checkout@v3       # ← stable, CDN everywhere
 
-    - name: Install system deps
+    # 2. Install system & python deps
+    - name: Install deps
       run: |
         sudo apt update
         sudo apt install -y zip openjdk-17-jdk python3-pip
         pip3 install --no-input buildozer==1.5.0 Cython==0.29.36
 
-    - name: Ensure binaries executable
+    # 3. Ensure ffmpeg & yt-dlp binaries executable
+    - name: chmod assets
       run: chmod +x assets/ffmpeg assets/yt-dlp_linux_aarch64
 
+    # 4. Build release APK
     - name: Build APK
       run: buildozer -v android release
 
+    # 5. Upload as artifact
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3.1.2   # ← pin to exact tag
       with:
         name: yt-trimmer-apk
         path: bin/*release.apk
