@@ -1,11 +1,5 @@
 name: Android APK
 
-# ── Grant the runner rights to fetch both actions & packages ────────────────
-permissions:
-  contents: read    # for actions/checkout
-  actions: read     # to pull workflow actions
-  packages: read    # to pull the upload-artifact action package
-
 on:
   push:
     branches:
@@ -35,9 +29,25 @@ jobs:
       - name: Build Android APK
         run: buildozer -v android release
 
-      # 5) Upload the APK artifact (v2.3.1 @ commit 82c141c)
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@82c141c
+      # 5) Create a draft GitHub Release
+      - name: Create Release
+        id: release
+        uses: actions/create-release@v1
         with:
-          name: yt-trimmer-apk
-          path: bin/*release.apk
+          tag_name: apk-${{ github.run_number }}
+          release_name: APK build ${{ github.run_number }}
+          draft: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 6) Upload the APK to that Release
+      - name: Upload to Release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: bin/*release.apk
+          asset_name: yt-trimmer.apk
+          asset_content_type: application/vnd.android.package-archive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
