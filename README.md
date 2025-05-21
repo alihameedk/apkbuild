@@ -1,2 +1,2 @@
 # apkbuild
-This is a online streaming trimmerr
+This is an online streaming trimmerr
