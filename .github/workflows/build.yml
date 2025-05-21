@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # optional: allows manual runs
 
 jobs:
   build:
@@ -15,21 +16,26 @@ jobs:
         uses: actions/checkout@v3
 
       # 2) Install Buildozer + system deps
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt update
           sudo apt install -y zip openjdk-17-jdk python3-pip
           pip3 install --no-input buildozer==1.5.0 Cython==0.29.36
 
-      # 3) Make your bundled binaries executable
+      # 3) Pre-accept Android SDK licenses so p4a can install build-tools
+      - name: Pre-accept Android SDK licenses
+        run: |
+          yes | $HOME/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --licenses || true
+
+      # 4) Make your bundled binaries executable
       - name: Make assets executable
         run: chmod +x assets/ffmpeg assets/yt-dlp_linux_aarch64
 
-      # 4) Build the release APK
+      # 5) Build the release APK
       - name: Build Android APK
         run: buildozer -v android release
 
-      # 5) Create a draft GitHub Release
+      # 6) Create a draft GitHub Release
       - name: Create Release
         id: release
         uses: actions/create-release@v1
@@ -41,7 +47,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 6) Upload the APK to that Release
+      # 7) Upload the APK to that Release
       - name: Upload to Release
         uses: actions/upload-release-asset@v1
         with:
